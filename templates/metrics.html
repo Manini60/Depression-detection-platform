@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindScan — Metrics</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand"><span class="dot"></span>MINDSCAN</a>
+  <a href="/">Dashboard</a>
+  <a href="/predict">Predict</a>
+  <a href="/model">Model</a>
+  <a href="/metrics" class="active">Metrics</a>
+  <a href="/about">About</a>
+</nav>
+
+<div class="page">
+  <div class="container">
+
+    <div class="page-header fade-in">
+      <div class="eyebrow">Evaluation</div>
+      <h1>Model Performance<br>Metrics</h1>
+      <p>Evaluation of the Bayesian Network classifier on sample predictions.</p>
+    </div>
+
+    <div class="metrics-grid">
+
+      <div class="card fade-in">
+        <div class="card-title">Confusion Matrix</div>
+        <img src="{{ url_for('static', filename='confusion.png') }}"
+             alt="Confusion Matrix">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <div class="card fade-in">
+          <div class="card-title">Performance Scores</div>
+          <div class="metric-row">
+            <span class="name">Model Type</span>
+            <span class="val">Bayesian Network</span>
+          </div>
+          <div class="metric-row">
+            <span class="name">Inference Algorithm</span>
+            <span class="val">Variable Elimination</span>
+          </div>
+          <div class="metric-row">
+            <span class="name">Training Method</span>
+            <span class="val">Maximum Likelihood Est.</span>
+          </div>
+          <div class="metric-row">
+            <span class="name">Feature Count</span>
+            <span class="val">7 nodes</span>
+          </div>
+          <div class="metric-row">
+            <span class="name">Output States</span>
+            <span class="val">Binary {0, 1}</span>
+          </div>
+        </div>
+
+        <div class="card fade-in">
+          <div class="card-title">Confusion Matrix Legend</div>
+          <div class="metric-row">
+            <span class="name">True Positive (TP)</span>
+            <span class="val" style="color:var(--green);">Correct Depression</span>
+          </div>
+          <div class="metric-row">
+            <span class="name">True Negative (TN)</span>
+            <span class="val" style="color:var(--green);">Correct Non-Depression</span>
+          </div>
+          <div class="metric-row">
+            <span class="name">False Positive (FP)</span>
+            <span class="val" style="color:var(--amber);">Incorrectly Flagged</span>
+          </div>
+          <div class="metric-row">
+            <span class="name">False Negative (FN)</span>
+            <span class="val" style="color:var(--red);">Missed Depression</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+  <div class="footer">MindScan · Model Metrics · Bayesian Network Evaluation</div>
+</div>
+
+</body>
+</html>

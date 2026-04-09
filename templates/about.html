@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindScan — About</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand"><span class="dot"></span>MINDSCAN</a>
+  <a href="/">Dashboard</a>
+  <a href="/predict">Predict</a>
+  <a href="/model">Model</a>
+  <a href="/metrics">Metrics</a>
+  <a href="/about" class="active">About</a>
+</nav>
+
+<div class="page">
+  <div class="container">
+
+    <div class="page-header fade-in">
+      <div class="eyebrow">Project Overview</div>
+      <h1>About<br>MindScan</h1>
+    </div>
+
+    <div class="about-grid">
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <div class="card fade-in">
+          <div class="card-title">What Is This?</div>
+          <div class="about-body">
+            <p>MindScan is a machine learning-powered web application that predicts the risk of depression among college students using a <strong style="color:var(--blue)">Bayesian Network</strong> model.</p>
+            <p>By analysing key lifestyle indicators — including sleep patterns, academic pressure, financial stress, dietary habits, and study satisfaction — the system computes a probabilistic assessment of depression risk using <strong style="color:var(--blue)">Variable Elimination</strong> inference.</p>
+            <p>The model was trained on a real-world survey dataset of over 27,000 Indian students, providing clinically-informed predictions grounded in real data.</p>
+          </div>
+        </div>
+
+        <div class="card fade-in">
+          <div class="card-title">Factors Analysed</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;">
+            {% for factor in ['Academic Pressure', 'Financial Stress', 'Sleep Duration', 'Study Satisfaction', 'Dietary Habits', 'Gender', 'Age Group'] %}
+            <div class="node-item">
+              <span style="color:var(--teal)">◆</span> {{ factor }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <div class="card fade-in">
+          <div class="card-title">Technology Stack</div>
+          <div class="tech-stack" style="margin-top:4px;">
+            <span class="tech-badge">Python 3</span>
+            <span class="tech-badge">Flask</span>
+            <span class="tech-badge">pgmpy</span>
+            <span class="tech-badge">pandas</span>
+            <span class="tech-badge">matplotlib</span>
+            <span class="tech-badge">seaborn</span>
+            <span class="tech-badge">scikit-learn</span>
+            <span class="tech-badge">Chart.js</span>
+            <span class="tech-badge">networkx</span>
+          </div>
+        </div>
+
+        <div class="card fade-in">
+          <div class="card-title">How It Works</div>
+          <div class="timeline" style="margin-top:8px;">
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-title">Data Collection</div>
+                <div class="tl-desc">27,902 student survey records across Indian cities</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-title">Preprocessing</div>
+                <div class="tl-desc">Discretisation of continuous variables into categorical bins</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-title">Model Training</div>
+                <div class="tl-desc">Bayesian Network fitted using Maximum Likelihood Estimation</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-title">Inference</div>
+                <div class="tl-desc">Variable Elimination computes posterior P(Depression | evidence)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card fade-in" style="border-color: var(--amber-dim); background: rgba(61,42,16,0.3);">
+          <div class="card-title" style="color:var(--amber)">⚠ Disclaimer</div>
+          <p style="font-size:13px; color:var(--muted); line-height:1.7;">
+            This tool is intended for academic research and educational purposes only. It does not constitute clinical diagnosis. Please consult a licensed mental health professional if you have concerns about your mental health.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">MindScan · Academic Research Project · Not a clinical tool</div>
+</div>
+
+</body>
+</html>

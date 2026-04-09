@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindScan — Predict</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .predict-layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 960px) { .predict-layout { grid-template-columns: 1fr; } }
+
+    .form-section-label {
+      font-family: var(--font-display);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin: 28px 0 20px;
+    }
+    .form-section-label:first-child { margin-top: 0; }
+
+    .cgpa-input {
+      width: 100%;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .cgpa-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(74,158,255,0.12);
+    }
+    .cgpa-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+    .slider-wrap { position: relative; }
+    .slider-val {
+      position: absolute; right: 0; top: -2px;
+      font-family: var(--font-display);
+      font-size: 13px; color: var(--blue);
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%; height: 6px;
+      background: var(--surface);
+      border-radius: 3px; outline: none;
+      border: 1px solid var(--border);
+      margin-top: 10px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--blue); cursor: pointer;
+      box-shadow: 0 0 8px rgba(74,158,255,0.4);
+      transition: transform 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .slider-labels {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--muted); margin-top: 5px;
+    }
+
+    .text-area {
+      width: 100%; min-height: 120px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 16px; font-family: var(--font-body);
+      font-size: 14px; line-height: 1.65; outline: none; resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .text-area:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(74,158,255,0.12);
+    }
+    .text-area::placeholder { color: var(--muted); }
+    .char-counter { font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; }
+
+    .btn-analyse {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--surface); border: 1px solid var(--border-glow);
+      color: var(--blue); border-radius: 8px;
+      padding: 9px 18px; font-family: var(--font-display);
+      font-size: 11px; letter-spacing: 0.07em; cursor: pointer;
+      transition: all 0.2s; margin-top: 8px;
+    }
+    .btn-analyse:hover { background: var(--blue-dim); box-shadow: var(--glow-blue); }
+    .btn-analyse .spin { display:none; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #keyword-box {
+      margin-top: 14px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; display: none;
+    }
+    #keyword-box .kb-title {
+      font-family: var(--font-display); font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
+    }
+    .keyword-clouds { display: flex; flex-wrap: wrap; gap: 8px; }
+    .kw { padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 500; }
+    .kw.stress   { background: rgba(240,80,80,0.15);  color: var(--red);   border: 1px solid rgba(240,80,80,0.3); }
+    .kw.positive { background: rgba(62,207,142,0.15); color: var(--green); border: 1px solid rgba(62,207,142,0.3); }
+    .kw.neutral  { background: var(--border); color: var(--muted); border: 1px solid var(--border); }
+    .ai-summary {
+      margin-top: 12px; font-size: 13px; color: var(--label); line-height: 1.7;
+      border-top: 1px solid var(--border); padding-top: 12px; display: none;
+    }
+    .sentiment-bar-row { margin-top: 12px; display: none; }
+
+    .score-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+    }
+    .score-row:last-child { border-bottom: none; }
+    .score-row .s-label { color: var(--muted); }
+    .score-row .s-val { font-family: var(--font-display); font-size: 12px; color: var(--blue); }
+
+    .combined-block {
+      background: var(--surface); border-radius: 14px;
+      border: 1px solid var(--border); padding: 24px; text-align: center;
+    }
+    .combined-block .c-label {
+      font-family: var(--font-display); font-size: 10px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .combined-prob-num {
+      font-family: var(--font-display); font-size: 44px; line-height: 1; margin-bottom: 12px;
+    }
+    .combined-prob-num.HIGH   { color: var(--red); }
+    .combined-prob-num.MEDIUM { color: var(--amber); }
+    .combined-prob-num.LOW    { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand"><span class="dot"></span>MINDSCAN</a>
+  <a href="/">Dashboard</a>
+  <a href="/predict" class="active">Predict</a>
+  <a href="/model">Model</a>
+  <a href="/metrics">Metrics</a>
+  <a href="/about">About</a>
+</nav>
+
+<div class="page">
+  <div class="container">
+
+    <div class="page-header fade-in">
+      <div class="eyebrow">Multi-Signal Assessment</div>
+      <h1>Depression Risk<br>Assessment</h1>
+      <p>Combine lifestyle factors, academic data, and free-text expression for a comprehensive prediction.</p>
+    </div>
+
+    <div class="predict-layout">
+
+      <!-- ═══════════ FORM ═══════════ -->
+      <div class="form-card fade-in">
+        <form method="POST" id="predictForm">
+
+          <input type="hidden" name="text_sentiment_score" id="textSentimentScore" value="0">
+
+          <!-- Section 1 -->
+          <div class="form-section-label">① Lifestyle &amp; Demographics</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Gender</label>
+              <div class="seg-control">
+                <input type="radio" name="gender" id="g-male" value="Male" {% if not prediction %}checked{% endif %}>
+                <label for="g-male">Male</label>
+                <input type="radio" name="gender" id="g-female" value="Female">
+                <label for="g-female">Female</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Age Group</label>
+              <select name="age">
+                <option value="Teen">Teen (15–20)</option>
+                <option value="Young" {% if not prediction %}selected{% endif %}>Young (21–25)</option>
+                <option value="Adult">Adult (26–30)</option>
+                <option value="Senior">Senior (31–40)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Sleep Duration</label>
+              <select name="sleep">
+                <option value="Less than 5 hours">Less than 5 hrs</option>
+                <option value="5-6 hours">5–6 hours</option>
+                <option value="7-8 hours" selected>7–8 hours</option>
+                <option value="More than 8 hours">More than 8 hrs</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Dietary Habits</label>
+              <select name="diet">
+                <option value="Healthy">Healthy</option>
+                <option value="Moderate" selected>Moderate</option>
+                <option value="Unhealthy">Unhealthy</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="form-section-label">② Academic Factors</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Academic Pressure</label>
+              <select name="ap">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Study Satisfaction</label>
+              <select name="ss">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>CGPA <span style="color:var(--muted);font-weight:400;font-size:11px;">(0–10)</span></label>
+              <input type="number" name="cgpa" class="cgpa-input"
+                placeholder="e.g. 7.5" min="0" max="10" step="0.01"
+                value="{{ cgpa or '' }}">
+              <div class="cgpa-hint">Lower CGPA may indicate higher academic stress</div>
+            </div>
+            <div class="form-group">
+              <label>Financial Stress</label>
+              <select name="fs">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Work / Study Hours per Day</label>
+            <div class="slider-wrap">
+              <span class="slider-val" id="sliderVal">{{ work_hours or '5' }} hrs</span>
+              <input type="range" name="work_hours" id="workSlider"
+                min="1" max="16" step="1" value="{{ work_hours or '5' }}"
+                oninput="document.getElementById('sliderVal').textContent = this.value + ' hrs'">
+            </div>
+            <div class="slider-labels">
+              <span>1 hr</span><span>4</span><span>8</span><span>12</span><span>16 hrs</span>
+            </div>
+          </div>
+
+          <!-- Section 3 -->
+          <div class="form-section-label">③ Express Yourself
+            <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">— optional</span>
+          </div>
+
+          <div class="form-group">
+            <label>How have you been feeling lately?</label>
+            <textarea id="userText" name="user_text" class="text-area"
+              placeholder="Describe how you've been feeling — your stress, mood, sleep, social life, studies... anything on your mind. The AI will highlight key emotional signals and factor the sentiment into the overall prediction."
+              maxlength="600">{{ user_text or '' }}</textarea>
+            <div class="char-counter"><span id="charCount">{{ (user_text or '') | length }}</span>/600</div>
+
+            <button type="button" class="btn-analyse" id="analyseBtn" onclick="analyseText()">
+              <svg id="btnIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+              <svg class="spin" id="btnSpin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              Analyse with AI
+            </button>
+
+            <!-- Keyword output box -->
+            <div id="keyword-box">
+              <div class="kb-title">AI Text Analysis</div>
+
+              <div id="kwStressLabel" style="font-size:11px;color:var(--red);margin-bottom:6px;display:none;">⚡ Stress / Negative signals</div>
+              <div class="keyword-clouds" id="stressCloud"></div>
+
+              <div id="kwPosLabel" style="font-size:11px;color:var(--green);margin:10px 0 6px;display:none;">✦ Positive signals</div>
+              <div class="keyword-clouds" id="positiveCloud"></div>
+
+              <div id="kwNeutLabel" style="font-size:11px;color:var(--muted);margin:10px 0 6px;display:none;">○ Neutral themes</div>
+              <div class="keyword-clouds" id="neutralCloud"></div>
+
+              <div class="sentiment-bar-row" id="sentimentBarRow">
+                <div class="prob-label" style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;">
+                  <span>Text distress signal</span>
+                  <span id="sentimentPct">–</span>
+                </div>
+                <div class="prob-bar-bg">
+                  <div class="prob-bar-fill danger" id="sentimentBarFill" style="width:0%;transition:width 0.9s cubic-bezier(0.4,0,0.2,1)"></div>
+                </div>
+              </div>
+
+              <div class="ai-summary" id="aiSummary"></div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-predict">
+            ⟳ &nbsp;Run Full Assessment
+          </button>
+
+        </form>
+      </div>
+
+      <!-- ═══════════ RESULTS ═══════════ -->
+      {% if prediction %}
+      <div class="result-panel fade-in">
+
+        {% set cr_class = 'HIGH' if combined_risk and 'HIGH' in combined_risk else ('MEDIUM' if combined_risk and 'MEDIUM' in combined_risk else 'LOW') %}
+
+        <div class="combined-block">
+          <div class="c-label">Combined Risk Score</div>
+          <div class="combined-prob-num {{ cr_class }}">
+            {{ "%.0f" | format((combined_prob or yes_prob) * 100) }}<span style="font-size:22px;">%</span>
+          </div>
+          <div class="risk-badge {{ cr_class }}" style="display:inline-flex;justify-content:center;">
+            <span class="dot"></span>
+            {{ combined_risk or risk }}
+          </div>
+        </div>
+
+        <div>
+          <div class="card-title" style="margin-bottom:10px;">Score Breakdown</div>
+          <div class="score-row">
+            <span class="s-label">🧠 Bayesian Network</span>
+            <span class="s-val">{{ "%.1f" | format(yes_prob * 100) }}%</span>
+          </div>
+          {% if cgpa %}
+          <div class="score-row">
+            <span class="s-label">📊 CGPA ({{ cgpa }})</span>
+            <span class="s-val">
+              {% set cgpa_f = cgpa | float %}
+              {% if cgpa_f < 5.0 %}+8.0%
+              {% elif cgpa_f < 7.0 %}+3.0%
+              {% else %}-3.0%{% endif %}
+            </span>
+          </div>
+          {% endif %}
+          {% if work_hours %}
+          <div class="score-row">
+            <span class="s-label">⏱ Study Hours ({{ work_hours }}/day)</span>
+            <span class="s-val">
+              {% set hrs_f = work_hours | float %}
+              {% if hrs_f >= 10 %}+7.0%
+              {% elif hrs_f >= 7 %}+3.0%
+              {% else %}+0.0%{% endif %}
+            </span>
+          </div>
+          {% endif %}
+          <div class="score-row">
+            <span class="s-label">✍ Text Sentiment</span>
+            <span class="s-val" id="textScoreDisplay" style="color:var(--muted);">–</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="card-title" style="margin-bottom:14px;">Bayesian Probability</div>
+          <div class="prob-bars">
+            <div class="prob-row">
+              <div class="prob-label">
+                <span>Not Depressed</span>
+                <span>{{ "%.1f" | format(no_prob * 100) }}%</span>
+              </div>
+              <div class="prob-bar-bg">
+                <div class="prob-bar-fill safe" style="width: {{ no_prob * 100 }}%"></div>
+              </div>
+            </div>
+            <div class="prob-row">
+              <div class="prob-label">
+                <span>Depressed</span>
+                <span>{{ "%.1f" | format(yes_prob * 100) }}%</span>
+              </div>
+              <div class="prob-bar-bg">
+                <div class="prob-bar-fill danger" style="width: {{ yes_prob * 100 }}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <img src="{{ url_for('static', filename='probability.png') }}?t={{ range(1, 99999) | random }}"
+               alt="Probability Chart">
+        </div>
+
+        {% if tips %}
+        <div>
+          <div class="card-title" style="margin-bottom:12px;">Personalised Recommendations</div>
+          <ul class="tips-list">
+            {% for tip in tips %}
+            <li>{{ tip }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+      </div>
+
+      {% else %}
+      <div class="placeholder-panel fade-in">
+        <div class="icon">🧠</div>
+        <p>Fill in the student's details, add optional text, and run the full multi-signal assessment.</p>
+        <br>
+        <p style="font-size:12px;color:var(--muted);line-height:2;">
+          ✦ Bayesian Network inference<br>
+          ✦ CGPA &amp; study-hours adjustment<br>
+          ✦ AI keyword &amp; sentiment analysis
+        </p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <div class="footer">
+    MindScan · For research purposes only. Not a substitute for professional clinical diagnosis.
+  </div>
+</div>
+
+<script>
+// ── Char counter ─────────────────────────────────────────────────────
+const textArea = document.getElementById('userText');
+textArea.addEventListener('input', () => {
+  document.getElementById('charCount').textContent = textArea.value.length;
+});
+
+// ── Analyse text with Anthropic API ─────────────────────────────────
+async function analyseText() {
+  const text = textArea.value.trim();
+  if (!text || text.length < 10) {
+    alert('Please write at least a sentence about how you feel.');
+    return;
+  }
+
+  const btn    = document.getElementById('analyseBtn');
+  const btnTxt = btn.querySelector('span') || btn;
+  document.getElementById('btnIcon').style.display = 'none';
+  document.getElementById('btnSpin').style.display = 'inline';
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+
+  try {
+    // ── Call our own Flask route (no CORS, no API key in browser) ──
+    const res = await fetch('/api/analyse-text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+
+    const result = await res.json();
+
+    if (result.error) throw new Error(result.error);
+
+    renderKeywords(result);
+
+    // Store sentiment adjustment as hidden field so form POST uses it
+    const score      = Math.min(Math.max(parseFloat(result.distress_score) || 0, 0), 1);
+    const adjustment = (score * 0.15).toFixed(4);
+    document.getElementById('textSentimentScore').value = adjustment;
+
+    // Update the score breakdown row in result panel (if visible)
+    const disp = document.getElementById('textScoreDisplay');
+    if (disp) {
+      disp.textContent = '+' + (parseFloat(adjustment) * 100).toFixed(1) + '%';
+      disp.style.color = 'var(--blue)';
+    }
+
+    // Show a small success note on the button
+    btn.style.borderColor = 'var(--teal)';
+    btn.style.color       = 'var(--teal)';
+
+  } catch (err) {
+    console.error('AI analysis error:', err);
+    const box = document.getElementById('keyword-box');
+    box.style.display = 'block';
+    const summary = document.getElementById('aiSummary');
+    summary.textContent = '⚠ Could not reach AI analysis (' + err.message + '). Keyword matching is used as fallback. Your assessment will still run.';
+    summary.style.display = 'block';
+  } finally {
+    document.getElementById('btnIcon').style.display = 'inline';
+    document.getElementById('btnSpin').style.display = 'none';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+}
+
+function renderKeywords(result) {
+  const box = document.getElementById('keyword-box');
+  box.style.display = 'block';
+
+  const stressCloud   = document.getElementById('stressCloud');
+  const positiveCloud = document.getElementById('positiveCloud');
+  const neutralCloud  = document.getElementById('neutralCloud');
+  stressCloud.innerHTML = positiveCloud.innerHTML = neutralCloud.innerHTML = '';
+
+  const tag = (word, cls) => {
+    const s = document.createElement('span');
+    s.className = `kw ${cls}`;
+    s.textContent = word;
+    return s;
+  };
+
+  if (result.stress_keywords?.length) {
+    document.getElementById('kwStressLabel').style.display = 'block';
+    result.stress_keywords.forEach(w => stressCloud.appendChild(tag(w, 'stress')));
+  }
+  if (result.positive_keywords?.length) {
+    document.getElementById('kwPosLabel').style.display = 'block';
+    result.positive_keywords.forEach(w => positiveCloud.appendChild(tag(w, 'positive')));
+  }
+  if (result.neutral_keywords?.length) {
+    document.getElementById('kwNeutLabel').style.display = 'block';
+    result.neutral_keywords.forEach(w => neutralCloud.appendChild(tag(w, 'neutral')));
+  }
+
+  const score = Math.min(Math.max(parseFloat(result.distress_score) || 0, 0), 1);
+  const sentRow = document.getElementById('sentimentBarRow');
+  sentRow.style.display = 'block';
+  document.getElementById('sentimentPct').textContent = Math.round(score * 100) + '% distress signal';
+  setTimeout(() => {
+    document.getElementById('sentimentBarFill').style.width = (score * 100) + '%';
+  }, 60);
+
+  const summary = document.getElementById('aiSummary');
+  if (result.summary) {
+    summary.textContent = result.summary;
+    summary.style.display = 'block';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindScan — Model</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand"><span class="dot"></span>MINDSCAN</a>
+  <a href="/">Dashboard</a>
+  <a href="/predict">Predict</a>
+  <a href="/model" class="active">Model</a>
+  <a href="/metrics">Metrics</a>
+  <a href="/about">About</a>
+</nav>
+
+<div class="page">
+  <div class="container">
+
+    <div class="page-header fade-in">
+      <div class="eyebrow">Architecture</div>
+      <h1>Bayesian Network<br>Structure</h1>
+      <p>A directed acyclic graph where each parent node influences the probability of the Depression node.</p>
+    </div>
+
+    <div class="model-grid">
+
+      <div class="card fade-in">
+        <div class="card-title">Network Graph</div>
+        <img class="network-img"
+             src="{{ url_for('static', filename='network.png') }}"
+             alt="Bayesian Network">
+        <p style="color:var(--muted); font-size:13px; margin-top:14px;">
+          Each factor node is connected to the Depression node, reflecting that all considered lifestyle variables directly influence the probability of depression as modelled by the Bayesian Network.
+        </p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <div class="card fade-in">
+          <div class="card-title">Factor Nodes</div>
+          <ul class="node-list">
+            <li class="node-item"><span class="arrow">→</span> Academic Pressure</li>
+            <li class="node-item"><span class="arrow">→</span> Financial Stress</li>
+            <li class="node-item"><span class="arrow">→</span> Sleep Duration</li>
+            <li class="node-item"><span class="arrow">→</span> Study Satisfaction</li>
+            <li class="node-item"><span class="arrow">→</span> Dietary Habits</li>
+            <li class="node-item"><span class="arrow">→</span> Gender</li>
+            <li class="node-item"><span class="arrow">→</span> Age</li>
+          </ul>
+        </div>
+
+        <div class="card fade-in">
+          <div class="card-title">Model Configuration</div>
+          <div>
+            <div class="metric-row">
+              <span class="name">Type</span>
+              <span class="val">Discrete Bayesian Network</span>
+            </div>
+            <div class="metric-row">
+              <span class="name">Estimator</span>
+              <span class="val">Maximum Likelihood</span>
+            </div>
+            <div class="metric-row">
+              <span class="name">Inference</span>
+              <span class="val">Variable Elimination</span>
+            </div>
+            <div class="metric-row">
+              <span class="name">Library</span>
+              <span class="val">pgmpy</span>
+            </div>
+            <div class="metric-row">
+              <span class="name">Target Node</span>
+              <span class="val">Depression {0, 1}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">MindScan · Bayesian Network · pgmpy + Variable Elimination</div>
+</div>
+
+</body>
+</html>
