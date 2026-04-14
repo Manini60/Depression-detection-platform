@@ -98,17 +98,6 @@ The Bayesian Network model calculates the probability of depression using multip
 
 ---
 
-## 🖼️ Screenshots
-
-### Input Page
-
-(Add screenshot here)
-
-### Output Page
-
-(Add screenshot here)
-
----
 
 ## 🚀 How to Run the Project
 
