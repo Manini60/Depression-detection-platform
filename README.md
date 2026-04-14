@@ -1,5 +1,4 @@
 # MindScan — Student Depression Detection
-TEST123
 A professional Flask web application that predicts student depression risk using a Bayesian Network model.
 
 ---
